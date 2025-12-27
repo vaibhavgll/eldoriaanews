@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eldoria | Overseer Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Rajdhani:wght@600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #030305;
+            --panel-bg: #0e0e11;
+            --border: #27272a;
+            --primary: #00ff88; 
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+        }
+
+        * { box-sizing: border-box; outline: none; }
+        
+        body { 
+            margin: 0; background: var(--bg-dark); color: var(--text-main); 
+            font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; display: flex; 
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 340px; background: var(--panel-bg); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; z-index: 20;
+        }
+
+        .header {
+            padding: 20px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo { font-family: 'Rajdhani'; font-weight: 800; font-size: 1.4rem; letter-spacing: 1px; color:white; }
+        
+        .scroll-area { flex: 1; overflow-y: auto; padding: 20px; }
+        .scroll-area::-webkit-scrollbar { width: 5px; }
+        .scroll-area::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+        .group-title {
+            font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); 
+            font-weight: 700; margin: 25px 0 10px 0; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;
+        }
+        .group-title:first-child { margin-top: 0; }
+        .group-title::after { content:''; flex:1; height:1px; background: var(--border); }
+
+        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        
+        label { font-size: 0.8rem; color: #71717a; margin-bottom: 4px; display: block; }
+        
+        input, select, textarea {
+            width: 100%; background: #18181b; border: 1px solid var(--border);
+            color: white; padding: 10px; border-radius: 6px; font-family: 'Inter'; font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        textarea.gallery-input { height: 100px; font-family: 'JetBrains Mono'; font-size: 0.75rem; resize: vertical; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(255,255,255,0.05); }
+
+        input[type="color"] { height: 40px; padding: 2px; cursor: pointer; }
+
+        .footer-actions { padding: 20px; border-top: 1px solid var(--border); background: var(--panel-bg); }
+        .btn-main {
+            width: 100%; background: var(--primary); color: #000; border: none; padding: 12px;
+            font-family: 'Rajdhani'; font-weight: 700; text-transform: uppercase; font-size: 1rem;
+            border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: 0.3s;
+        }
+        .btn-main:hover { filter: brightness(1.1); box-shadow: 0 0 20px rgba(0,255,136,0.3); }
+
+        /* --- EDITOR --- */
+        .editor { flex: 1; display: flex; flex-direction: column; background: #000; position: relative; }
+        
+        .toolbar {
+            height: 50px; background: #09090b; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; padding: 0 15px; gap: 5px;
+        }
+        .tool {
+            width: 30px; height: 30px; background: transparent; border: 1px solid transparent; color: #71717a;
+            border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .tool:hover { background: #27272a; color: white; }
+
+        .workspace { flex: 1; display: flex; overflow: hidden; }
+        
+        .write-pane { width: 50%; padding: 40px; overflow-y: auto; border-right: 1px solid var(--border); background: #09090b; }
+        .title-field { width: 100%; background: transparent; border: none; font-size: 2.5rem; font-weight: 800; color: white; font-family: 'Rajdhani'; margin-bottom: 20px; text-transform: uppercase; }
+        .title-field::placeholder { color: #27272a; }
+        .body-field { width: 100%; height: 70vh; background: transparent; border: none; color: #d4d4d8; font-size: 1rem; line-height: 1.8; resize: none; }
+        .body-field::placeholder { color: #3f3f46; }
+
+        .preview-pane { width: 50%; background: #000; display: flex; flex-direction: column; }
+        .preview-header { padding: 8px 15px; background: #18181b; border-bottom: 1px solid var(--border); font-size: 0.7rem; text-transform: uppercase; color: #71717a; letter-spacing: 1px; display: flex; justify-content: space-between; }
+        iframe { width: 100%; height: 100%; border: none; background: #000; }
+
+        /* --- MODAL --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); z-index: 100; display: none; align-items: center; justify-content: center; }
+        .modal { width: 900px; background: #09090b; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow: hidden; }
+        .modal-head { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; }
+        .code-col { padding: 20px; border-right: 1px solid var(--border); }
+        .code-area { width: 100%; height: 250px; background: #000; border: 1px solid var(--border); color: #a5b4fc; font-family: 'JetBrains Mono'; font-size: 0.8rem; padding: 15px; margin-top: 10px; border-radius: 6px; resize: none; }
+        .btn-copy { margin-top: 10px; background: #27272a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+        .btn-copy:hover { background: var(--primary); color: black; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="header">
+            <div class="logo">ELDORIA<span style="color:var(--primary)">.OP</span></div>
+            <div style="font-size:0.7rem; color:#555;">v4.0 Gallery</div>
+        </div>
+
+        <div class="scroll-area">
+            
+            <div class="group-title"><i class="fas fa-database"></i> METADATA</div>
+            <label>Filename</label>
+            <input type="text" id="filename" placeholder="post-name.html" onkeyup="updateLive()">
+            
+            <div class="input-row" style="margin-top:10px;">
+                <div>
+                    <label>Folder</label>
+                    <select id="section" onchange="updateLive()">
+                        <option value="block">Daily Block News</option>
+                        <option value="shop">Shop News</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Date</label>
+                    <input type="text" id="date" value="Dec 28, 2025" onkeyup="updateLive()">
+                </div>
+            </div>
+            <label>Author</label>
+            <input type="text" id="author" value="Admin_Steve" onkeyup="updateLive()">
+
+            <div class="group-title"><i class="fas fa-image"></i> HERO & STYLE</div>
+            <label>Main Image URL</label>
+            <input type="text" id="image" value="https://placehold.co/1200x600/050505/00ff88" onkeyup="updateLive()">
+            
+            <div class="input-row" style="margin-top:10px;">
+                <div>
+                    <label>Overlay (0-1)</label>
+                    <input type="number" id="overlay" value="0.6" step="0.1" max="1" min="0" onchange="updateLive()">
+                </div>
+                <div>
+                    <label>Accent Color</label>
+                    <input type="color" id="accent" value="#00ff88" oninput="updateColor(this.value)">
+                </div>
+            </div>
+            <label>Badge Text</label>
+            <input type="text" id="badge" value="OFFICIAL" onkeyup="updateLive()">
+
+            <div class="group-title"><i class="fas fa-images"></i> EVIDENCE / GALLERY</div>
+            <label>Gallery URLs (One per line)</label>
+            <textarea id="gallery-urls" class="gallery-input" placeholder="https://image1.jpg&#10;https://image2.jpg&#10;https://image3.jpg" onkeyup="updateLive()"></textarea>
+
+        </div>
+
+        <div class="footer-actions">
+            <button class="btn-main" onclick="openModal()">
+                <i class="fas fa-code"></i> GENERATE ASSETS
+            </button>
+        </div>
+    </aside>
+
+    <main class="editor">
+        <div class="toolbar">
+            <button class="tool" onclick="insertTag('<b>', '</b>')" title="Bold"><i class="fas fa-bold"></i></button>
+            <button class="tool" onclick="insertTag('<i>', '</i>')" title="Italic"><i class="fas fa-italic"></i></button>
+            <button class="tool" onclick="insertTag('<h2>', '</h2>')" title="Header"><i class="fas fa-heading"></i></button>
+            <button class="tool" onclick="insertTag('<ul>\n<li>', '</li>\n</ul>')" title="List"><i class="fas fa-list-ul"></i></button>
+            <button class="tool" onclick="insertTag('<div class=\'box\'>', '</div>')" title="Box"><i class="fas fa-box"></i></button>
+        </div>
+
+        <div class="workspace">
+            <div class="write-pane">
+                <input type="text" id="title" class="title-field" placeholder="ENTER TITLE..." onkeyup="updateLive()">
+                <textarea id="content" class="body-field" placeholder="Write content here..." onkeyup="updateLive()"></textarea>
+            </div>
+            <div class="preview-pane">
+                <div class="preview-header">
+                    <span><i class="fas fa-eye"></i> Live Simulation</span>
+                    <span>Desktop</span>
+                </div>
+                <iframe id="previewFrame"></iframe>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="codeModal">
+        <div class="modal">
+            <div class="modal-head">
+                <h3 style="margin:0; font-family:'Rajdhani'; color:white;">ASSETS READY</h3>
+                <button onclick="document.getElementById('codeModal').style.display='none'" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            <div class="modal-grid">
+                <div class="code-col">
+                    <label style="color:var(--primary)">1. FILE CODE (Paste in new .html)</label>
+                    <textarea id="outputFile" class="code-area"></textarea>
+                    <button class="btn-copy" onclick="copyCode('outputFile')">COPY CODE</button>
+                </div>
+                <div class="code-col" style="background:#0e0e11;">
+                    <label style="color:#bd00ff">2. DB ENTRY (Paste in database.js)</label>
+                    <textarea id="outputDB" class="code-area" style="color:#bd00ff"></textarea>
+                    <button class="btn-copy" onclick="copyCode('outputDB')">COPY SNIPPET</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAccent = "#00ff88";
+
+        function updateColor(val) {
+            currentAccent = val;
+            document.documentElement.style.setProperty('--primary', val);
+            updateLive();
+        }
+
+        function insertTag(start, end) {
+            const el = document.getElementById('content');
+            const s = el.selectionStart;
+            const e = el.selectionEnd;
+            const text = el.value;
+            el.value = text.substring(0, s) + start + text.substring(s, e) + end + text.substring(e);
+            updateLive();
+        }
+
+        // --- GALLERY LOGIC GENERATOR ---
+        function getGalleryScript(urls) {
+            if (!urls || urls.length === 0) return "";
+            
+            // This JS will be embedded INSIDE the generated post
+            const urlArrayString = JSON.stringify(urls);
+            return `
+            <div class="gallery-container" id="gallery-root">
+                <div class="gallery-view">
+                    <img id="gal-img" src="${urls[0]}" alt="Gallery Image">
+                    <div class="gal-nav">
+                        <button onclick="changeSlide(-1)"><i class="fas fa-chevron-left"></i></button>
+                        <span id="gal-count">1 / ${urls.length}</span>
+                        <button onclick="changeSlide(1)"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <script>
+                const galleryImages = ${urlArrayString};
+                let currentIndex = 0;
+                
+                function changeSlide(direction) {
+                    currentIndex += direction;
+                    if (currentIndex >= galleryImages.length) currentIndex = 0;
+                    if (currentIndex < 0) currentIndex = galleryImages.length - 1;
+                    
+                    document.getElementById('gal-img').src = galleryImages[currentIndex];
+                    document.getElementById('gal-count').innerText = (currentIndex + 1) + " / " + galleryImages.length;
+                }
+            <\/script>`;
+        }
+
+        function getPostHTML() {
+            const d = {
+                title: document.getElementById('title').value || "NEW POST",
+                content: document.getElementById('content').value || "<p>Loading...</p>",
+                author: document.getElementById('author').value,
+                date: document.getElementById('date').value,
+                image: document.getElementById('image').value,
+                overlay: document.getElementById('overlay').value,
+                badge: document.getElementById('badge').value,
+                galleryRaw: document.getElementById('gallery-urls').value
+            };
+
+            // Process Gallery URLs
+            const galleryUrls = d.galleryRaw.split('\n').map(u => u.trim()).filter(u => u.length > 0);
+            const galleryHTML = galleryUrls.length > 0 ? getGalleryScript(galleryUrls) : "";
+
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${d.title}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --accent: ${currentAccent};
+            --bg: #050505;
+            --glass: rgba(20, 20, 20, 0.9);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; background-image: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.03), transparent 60%); }
+        
+        .hero {
+            width: 100%; height: 50vh; background: url('${d.image}') center/cover fixed;
+            display: flex; align-items: flex-end; justify-content: center; padding-bottom: 60px;
+            position: relative;
+        }
+        .hero::before { content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,${d.overlay}); }
+        
+        .card {
+            position: relative; z-index: 10; width: 90%; max-width: 800px;
+            background: var(--glass); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-top: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px; padding: 50px; margin: -50px auto 100px auto;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        h1 { font-family: 'Rajdhani'; font-size: 3.5rem; line-height: 1; margin: 20px 0; text-transform: uppercase; font-weight: 800; }
+        .badge { background: var(--accent); color: #000; padding: 5px 12px; font-weight: 800; font-family: 'Rajdhani'; border-radius: 4px; display: inline-block; }
+        .meta { display: flex; gap: 20px; color: #aaa; font-size: 0.9rem; font-family: 'Rajdhani'; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 30px; }
+        
+        .content { font-size: 1.15rem; line-height: 1.8; color: #d4d4d8; }
+        .content p { margin-bottom: 25px; }
+        .content h2 { color: white; font-family: 'Rajdhani'; margin-top: 40px; font-size: 2rem; border-left: 3px solid var(--accent); padding-left: 15px; }
+        .box { background: rgba(0,0,0,0.3); border-left: 3px solid var(--accent); padding: 15px; margin: 20px 0; color: #fff; font-style: italic; }
+
+        /* GALLERY STYLES */
+        .gallery-container { margin: 40px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #000; }
+        .gallery-view { position: relative; width: 100%; height: 400px; }
+        .gallery-view img { width: 100%; height: 100%; object-fit: contain; }
+        .gal-nav {
+            position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.8);
+            display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;
+        }
+        .gal-nav button { background: var(--accent); border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        .gal-nav span { font-family: 'Rajdhani'; font-weight: bold; color: white; }
+
+        .nav-bar { position: fixed; top: 0; width: 100%; padding: 20px 40px; z-index: 100; display: flex; justify-content: space-between; }
+        .back-btn { color: white; text-decoration: none; font-family: 'Rajdhani'; font-weight: 700; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+        .back-btn:hover { color: var(--accent); }
+        
+        @media(max-width:768px) { h1 { font-size: 2.5rem; } .card { padding: 25px; } .gallery-view { height: 250px; } }
+    </style>
+</head>
+<body>
+    <div class="nav-bar"><a href="../index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Hub</a></div>
+    <header class="hero"></header>
+    <main class="card">
+        <span class="badge">${d.badge}</span>
+        <h1>${d.title}</h1>
+        <div class="meta">
+            <span><i class="fas fa-user-circle"></i> ${d.author}</span>
+            <span><i class="far fa-calendar-alt"></i> ${d.date}</span>
+        </div>
+        <div class="content">
+            ${d.content}
+            ${galleryHTML} </div>
+        <div style="margin-top: 50px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; color: #555; font-size: 0.8rem; font-family: 'Rajdhani';">OFFICIAL TRANSMISSION</div>
+    </main>
+</body>
+</html>`;
+        }
+
+        function updateLive() {
+            const frame = document.getElementById('previewFrame');
+            frame.contentWindow.document.open();
+            frame.contentWindow.document.write(getPostHTML());
+            frame.contentWindow.document.close();
+        }
+
+        function openModal() {
+            const d = {
+                title: document.getElementById('title').value,
+                author: document.getElementById('author').value,
+                date: document.getElementById('date').value,
+                image: document.getElementById('image').value,
+                filename: document.getElementById('filename').value || "untitled.html",
+                section: document.getElementById('section').value
+            };
+            document.getElementById('outputFile').value = getPostHTML();
+            const dbSnippet = `
+    {
+        type: "${d.section}",
+        title: "${d.title}",
+        author: "${d.author}",
+        date: "${d.date}",
+        image: "${d.image}",
+        link: "DAILYBLOCKNEWS/${d.filename}"
+    },`;
+            document.getElementById('outputDB').value = dbSnippet;
+            document.getElementById('codeModal').style.display = 'flex';
+        }
+
+        function copyCode(id) {
+            document.getElementById(id).select();
+            document.execCommand('copy');
+            alert('COPIED');
+        }
+
+        updateLive();
+    </script>
+</body>
+</html>
