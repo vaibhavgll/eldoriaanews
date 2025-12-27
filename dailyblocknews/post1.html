@@ -10,18 +10,21 @@
         :root {
             --accent: #00ff88;
             --bg: #050505;
-            --glass: rgba(20, 20, 20, 0.9);
+            --glass: rgba(20, 20, 20, 0.95); /* Slightly darker for legibility */
             --border: rgba(255, 255, 255, 0.1);
         }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; background-image: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.03), transparent 60%); }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         
+        /* Hero Section - FIXED MOBILE BUG HERE */
         .hero {
-            width: 100%; height: 50vh; background: url('https://imgs.search.brave.com/LTwwOOs26Y388EAuZlgd3jVpzbvv7VWHQtetqKt8o2w/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvbW92/aW5nLW1pbmVjcmFm/dC1sb25lLW1hbi0w/eXdjMHBqM21mYmgz/NDA0LmpwZw') center/cover fixed;
+            width: 100%; height: 50vh;
+            background: url('https://imgs.search.brave.com/LTwwOOs26Y388EAuZlgd3jVpzbvv7VWHQtetqKt8o2w/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvbW92/aW5nLW1pbmVjcmFm/dC1sb25lLW1hbi0w/eXdjMHBqM21mYmgz/NDA0LmpwZw') center/cover fixed;
             display: flex; align-items: flex-end; justify-content: center; padding-bottom: 60px;
             position: relative;
         }
         .hero::before { content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); }
         
+        /* Card */
         .card {
             position: relative; z-index: 10; width: 90%; max-width: 800px;
             background: var(--glass); backdrop-filter: blur(20px);
@@ -46,27 +49,34 @@
         .gallery-controls {
             position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.85);
             display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid var(--border); z-index: 50; /* Ensure clickable */
         }
         .gallery-controls button {
             background: var(--accent); border: none; padding: 8px 16px; cursor: pointer;
             border-radius: 4px; font-weight: bold; font-family: 'Rajdhani'; text-transform: uppercase;
         }
-        .gallery-controls button:hover { filter: brightness(1.2); }
-        .gallery-controls span { font-family: 'Rajdhani'; color: white; font-weight: 700; }
 
-        .nav-bar { position: fixed; top: 0; width: 100%; padding: 20px 40px; z-index: 100; display: flex; justify-content: space-between; }
-        .back-btn { color: white; text-decoration: none; font-family: 'Rajdhani'; font-weight: 700; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
-        .back-btn:hover { color: var(--accent); }
+        .nav-bar { position: fixed; top: 0; width: 100%; padding: 20px 40px; z-index: 100; display: flex; justify-content: space-between; pointer-events: none; }
+        .back-btn { pointer-events: auto; color: white; text-decoration: none; font-family: 'Rajdhani'; font-weight: 700; display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 50px; backdrop-filter: blur(5px); }
         
-        @media(max-width:768px) { h1 { font-size: 2.5rem; } .card { padding: 25px; } .gallery-frame { height: 300px; } }
+        /* MOBILE FIXES */
+        @media(max-width:768px) { 
+            .hero { 
+                background-attachment: scroll !important; /* DISABLES FIXED PARALLAX ON MOBILE */
+                height: 40vh;
+            }
+            h1 { font-size: 2.2rem; } 
+            .card { padding: 25px; margin-top: -30px; } 
+            .gallery-frame { height: 300px; } 
+            .nav-bar { padding: 15px; }
+        }
     </style>
 </head>
 <body>
     <div class="nav-bar"><a href="../index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Hub</a></div>
     <header class="hero"></header>
     <main class="card">
-        <span class="badge">INVESTIGATION | SECURITY CONCERN | PROBABLY GRIEFING </span>
+        <span class="badge">INVESTIGATION | SECURITY CONCERN | PROBABLY GRIEFING</span>
         <h1>Private Base Breach Raises Questions Across Eldoriaaa Server</h1>
         <div class="meta">
             <span><i class="fas fa-user-circle"></i> VGAMER56588</span>
@@ -190,19 +200,12 @@ Further updates will be issued only if new evidence emerges.
             </div>
             
             <script>
-                // Gallery Data
                 window.galImages = ["https://media.discordapp.net/attachments/1186863316660916329/1454419551596056728/2025-12-26_23.38.14.png?ex=69510542&is=694fb3c2&hm=30fc4b32dddc22bbebfbf4e1aa535147ac8ea76bcf885d7b6ee1a86c089fefe8&=&format=webp&quality=lossless&width=1194&height=615","https://media.discordapp.net/attachments/1186863316660916329/1454423074450440373/2025-12-26_23.38.23.png?ex=6951088a&is=694fb70a&hm=91e482851c304c330e3547ce1e180c7eadfbd0654219e912c9abe9c4945ec14e&=&format=webp&quality=lossless&width=1194&height=615","https://media.discordapp.net/attachments/1186863316660916329/1454423172228186154/2025-12-26_23.38.49.png?ex=695108a2&is=694fb722&hm=83f6cc0f76b9f213576fe4d6617a18f43439a4aaa2aebe7f290c7ad3ccb1db99&=&format=webp&quality=lossless&width=1194&height=615"];
                 window.galIndex = 0;
-
-                // Global function for buttons
                 window.moveSlide = function(step) {
                     window.galIndex += step;
-                    
-                    // Loop logic
                     if(window.galIndex >= window.galImages.length) window.galIndex = 0;
                     if(window.galIndex < 0) window.galIndex = window.galImages.length - 1;
-
-                    // Update DOM
                     document.getElementById('gal-img').src = window.galImages[window.galIndex];
                     document.getElementById('gal-count').innerText = (window.galIndex + 1) + " / " + window.galImages.length;
                 }
