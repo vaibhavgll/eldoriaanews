@@ -6,7 +6,7 @@ const newsDatabase = [
         title: "Private Base Breach Raises Questions Across Eldoriaaa Server",
         author: "VGAMER56588",
         date: "Dec 27, 2025",
-        image: "https://placehold.co/600x300/111/00ff88?text=DRAGON",
+        image: "https://media.discordapp.net/attachments/1186863316660916329/1454419551596056728/2025-12-26_23.38.14.png?ex=69510542&is=694fb3c2&hm=30fc4b32dddc22bbebfbf4e1aa535147ac8ea76bcf885d7b6ee1a86c089fefe8&=&format=webp&quality=lossless&width=1194&height=615",
         link: "dailyblocknews/post1.html" // The file you saved
     },
     // If you delete everything inside these brackets [], it will show "None"
