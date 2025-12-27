@@ -20,13 +20,8 @@
         * { box-sizing: border-box; outline: none; }
         
         body { 
-            margin: 0; 
-            background: var(--bg-dark); 
-            color: var(--text-main); 
-            font-family: 'Inter', sans-serif; 
-            height: 100vh; 
-            overflow: hidden; 
-            display: flex; 
+            margin: 0; background: var(--bg-dark); color: var(--text-main); 
+            font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; display: flex; 
         }
 
         /* --- SIDEBAR --- */
@@ -116,7 +111,7 @@
     <aside class="sidebar">
         <div class="header">
             <div class="logo">ELDORIA<span style="color:var(--primary)">.OP</span></div>
-            <div style="font-size:0.7rem; color:#555;">v5.2 No Hero BG</div>
+            <div style="font-size:0.7rem; color:#555;">v5.3 UI Polish</div>
         </div>
 
         <div class="scroll-area">
@@ -139,7 +134,7 @@
                 </div>
             </div>
             <label>Author</label>
-            <input type="text" id="author" value="Admin_Steve" onkeyup="updateLive()">
+            <input type="text" id="author" value="VGAMER56588" onkeyup="updateLive()">
 
             <div class="group-title"><i class="fas fa-paint-brush"></i> STYLE</div>
             
@@ -153,7 +148,6 @@
                     <input type="text" id="badge" value="OFFICIAL" onkeyup="updateLive()">
                 </div>
             </div>
-           
 
             <div class="group-title"><i class="fas fa-images"></i> GALLERY</div>
             <label>Image URLs (One per line)</label>
@@ -216,7 +210,7 @@
 
     <script>
         let currentAccent = "#00ff88";
-        // Default banner constant is kept for DB snippet compatibility, but not used in HTML generation.
+        // Default banner for DB snippets (not used in HTML layout anymore)
         const DEFAULT_BANNER = "https://media.discordapp.net/attachments/1423324034699104297/1454431005250158805/Eldoria.png?ex=69510fed&is=694fbe6d&hm=23450ed205132dfe7f935c5940db1759386a6a8e22e1301c73801405f68c0b6c&=&format=webp&quality=lossless&width=480&height=180";
 
         function updateColor(val) {
@@ -267,7 +261,6 @@
                 content: document.getElementById('content').value || "<p>Loading...</p>",
                 author: document.getElementById('author').value,
                 date: document.getElementById('date').value,
-                // Overlay is no longer used
                 badge: document.getElementById('badge').value,
                 galleryRaw: document.getElementById('gallery-urls').value
             };
@@ -292,12 +285,8 @@
         }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         
-        /* Hero Section - SPACER ONLY */
-        .hero {
-            width: 100%; 
-            height: 80px; /* Just space for nav */
-            background: transparent;
-        }
+        /* SPACER */
+        .hero { width: 100%; height: 80px; background: transparent; }
         
         /* Card */
         .card {
@@ -305,7 +294,7 @@
             background: var(--glass); backdrop-filter: blur(20px);
             border: 1px solid var(--border); border-top: 1px solid rgba(255,255,255,0.2);
             border-radius: 16px; padding: 50px; 
-            margin: 20px auto 100px auto; /* Changed margin to sit below hero spacer */
+            margin: 20px auto 100px auto;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
@@ -318,7 +307,7 @@
         .content h2 { color: white; font-family: 'Rajdhani'; margin-top: 40px; font-size: 2rem; border-left: 3px solid var(--accent); padding-left: 15px; }
         .box { background: rgba(0,0,0,0.3); border-left: 3px solid var(--accent); padding: 15px; margin: 20px 0; color: #fff; font-style: italic; }
         
-        /* --- MOBILE FRIENDLY USER IMAGES --- */
+        /* --- USER IMAGES --- */
         .content img {
             max-width: 100%;
             height: auto;
@@ -326,26 +315,35 @@
             margin: 30px auto;
             border-radius: 12px;
             border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* Gallery CSS */
-        .gallery-wrapper { margin: 40px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #000; }
-        .gallery-frame { position: relative; width: 100%; height: 450px; }
-        .gallery-frame img { width: 100%; height: 100%; object-fit: contain; background: #000; }
+        /* --- GALLERY UI UPGRADE --- */
+        .gallery-wrapper { margin: 40px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #000; position: relative; }
+        .gallery-frame { position: relative; width: 100%; height: 500px; display:flex; align-items:center; justify-content:center; }
+        .gallery-frame img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        
+        /* Floating Pill Controls */
         .gallery-controls {
-            position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.85);
-            display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;
-            border-top: 1px solid var(--border); z-index: 50;
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 250px;
+            background: rgba(10, 10, 10, 0.85); backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 8px 12px;
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 50px;
+            z-index: 50; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
         .gallery-controls button {
-            background: var(--accent); border: none; padding: 8px 16px; cursor: pointer;
-            border-radius: 4px; font-weight: bold; font-family: 'Rajdhani'; text-transform: uppercase;
+            background: var(--accent); border: none; width: 35px; height: 35px;
+            border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; color: #000; transition: 0.2s;
         }
+        .gallery-controls button:active { transform: scale(0.9); }
+        .gallery-controls span { font-family: 'Rajdhani'; font-weight: 800; color: white; font-size: 1rem; letter-spacing: 1px; }
 
         .nav-bar { position: fixed; top: 0; width: 100%; padding: 20px 40px; z-index: 100; display: flex; justify-content: space-between; pointer-events: none; }
         .back-btn { pointer-events: auto; color: white; text-decoration: none; font-family: 'Rajdhani'; font-weight: 700; display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 50px; backdrop-filter: blur(5px); }
         
-        /* Mobile Fixes */
         @media(max-width:768px) { 
             .hero { height: 70px; }
             h1 { font-size: 2.2rem; } 
@@ -392,7 +390,6 @@
             };
             document.getElementById('outputFile').value = getPostHTML();
             
-            // Using default banner in DB snippet for consistency, even if not shown on page
             const dbSnippet = `
     {
         type: "${d.section}",
