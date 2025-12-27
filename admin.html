@@ -111,7 +111,7 @@
     <aside class="sidebar">
         <div class="header">
             <div class="logo">ELDORIA<span style="color:var(--primary)">.OP</span></div>
-            <div style="font-size:0.7rem; color:#555;">v4.1 Fixed</div>
+            <div style="font-size:0.7rem; color:#555;">v4.2 Mobile Fix</div>
         </div>
 
         <div class="scroll-area">
@@ -138,7 +138,7 @@
 
             <div class="group-title"><i class="fas fa-image"></i> HERO & STYLE</div>
             <label>Main Image URL</label>
-            <input type="text" id="image" value="https://placehold.co/1200x600/050505/00ff88" onkeyup="updateLive()">
+            <input type="text" id="image" value="https://imgs.search.brave.com/LTwwOOs26Y388EAuZlgd3jVpzbvv7VWHQtetqKt8o2w/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvbW92/aW5nLW1pbmVjcmFm/dC1sb25lLW1hbi0w/eXdjMHBqM21mYmgz/NDA0LmpwZw" onkeyup="updateLive()">
             
             <div class="input-row" style="margin-top:10px;">
                 <div>
@@ -229,11 +229,9 @@
             updateLive();
         }
 
-        // --- NEW GALLERY LOGIC (FIXED) ---
+        // --- NEW GALLERY LOGIC ---
         function getGalleryHTML(urls) {
             if (!urls || urls.length === 0) return "";
-            
-            // This structure uses global window functions for absolute reliability
             return `
             <div class="gallery-wrapper">
                 <div class="gallery-frame">
@@ -247,19 +245,12 @@
             </div>
             
             <script>
-                // Gallery Data
                 window.galImages = ${JSON.stringify(urls)};
                 window.galIndex = 0;
-
-                // Global function for buttons
                 window.moveSlide = function(step) {
                     window.galIndex += step;
-                    
-                    // Loop logic
                     if(window.galIndex >= window.galImages.length) window.galIndex = 0;
                     if(window.galIndex < 0) window.galIndex = window.galImages.length - 1;
-
-                    // Update DOM
                     document.getElementById('gal-img').src = window.galImages[window.galIndex];
                     document.getElementById('gal-count').innerText = (window.galIndex + 1) + " / " + window.galImages.length;
                 }
@@ -281,6 +272,7 @@
             const galleryUrls = d.galleryRaw.split('\n').map(u => u.trim()).filter(u => u.length > 0);
             const gallerySection = getGalleryHTML(galleryUrls);
 
+            // NOTE THE CSS CHANGES BELOW FOR MOBILE
             return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -293,18 +285,21 @@
         :root {
             --accent: ${currentAccent};
             --bg: #050505;
-            --glass: rgba(20, 20, 20, 0.9);
+            --glass: rgba(20, 20, 20, 0.95); /* Slightly darker for legibility */
             --border: rgba(255, 255, 255, 0.1);
         }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; background-image: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.03), transparent 60%); }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         
+        /* Hero Section - FIXED MOBILE BUG HERE */
         .hero {
-            width: 100%; height: 50vh; background: url('${d.image}') center/cover fixed;
+            width: 100%; height: 50vh;
+            background: url('${d.image}') center/cover fixed;
             display: flex; align-items: flex-end; justify-content: center; padding-bottom: 60px;
             position: relative;
         }
         .hero::before { content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,${d.overlay}); }
         
+        /* Card */
         .card {
             position: relative; z-index: 10; width: 90%; max-width: 800px;
             background: var(--glass); backdrop-filter: blur(20px);
@@ -329,20 +324,27 @@
         .gallery-controls {
             position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.85);
             display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid var(--border); z-index: 50; /* Ensure clickable */
         }
         .gallery-controls button {
             background: var(--accent); border: none; padding: 8px 16px; cursor: pointer;
             border-radius: 4px; font-weight: bold; font-family: 'Rajdhani'; text-transform: uppercase;
         }
-        .gallery-controls button:hover { filter: brightness(1.2); }
-        .gallery-controls span { font-family: 'Rajdhani'; color: white; font-weight: 700; }
 
-        .nav-bar { position: fixed; top: 0; width: 100%; padding: 20px 40px; z-index: 100; display: flex; justify-content: space-between; }
-        .back-btn { color: white; text-decoration: none; font-family: 'Rajdhani'; font-weight: 700; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
-        .back-btn:hover { color: var(--accent); }
+        .nav-bar { position: fixed; top: 0; width: 100%; padding: 20px 40px; z-index: 100; display: flex; justify-content: space-between; pointer-events: none; }
+        .back-btn { pointer-events: auto; color: white; text-decoration: none; font-family: 'Rajdhani'; font-weight: 700; display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 50px; backdrop-filter: blur(5px); }
         
-        @media(max-width:768px) { h1 { font-size: 2.5rem; } .card { padding: 25px; } .gallery-frame { height: 300px; } }
+        /* MOBILE FIXES */
+        @media(max-width:768px) { 
+            .hero { 
+                background-attachment: scroll !important; /* DISABLES FIXED PARALLAX ON MOBILE */
+                height: 40vh;
+            }
+            h1 { font-size: 2.2rem; } 
+            .card { padding: 25px; margin-top: -30px; } 
+            .gallery-frame { height: 300px; } 
+            .nav-bar { padding: 15px; }
+        }
     </style>
 </head>
 <body>
