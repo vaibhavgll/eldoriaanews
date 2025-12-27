@@ -111,7 +111,7 @@
     <aside class="sidebar">
         <div class="header">
             <div class="logo">ELDORIA<span style="color:var(--primary)">.OP</span></div>
-            <div style="font-size:0.7rem; color:#555;">v4.2 Mobile Fix</div>
+            <div style="font-size:0.7rem; color:#555;">v5.0 Banner Locked</div>
         </div>
 
         <div class="scroll-area">
@@ -136,9 +136,7 @@
             <label>Author</label>
             <input type="text" id="author" value="Admin_Steve" onkeyup="updateLive()">
 
-            <div class="group-title"><i class="fas fa-image"></i> HERO & STYLE</div>
-            <label>Main Image URL</label>
-            <input type="text" id="image" value="https://imgs.search.brave.com/LTwwOOs26Y388EAuZlgd3jVpzbvv7VWHQtetqKt8o2w/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvbW92/aW5nLW1pbmVjcmFm/dC1sb25lLW1hbi0w/eXdjMHBqM21mYmgz/NDA0LmpwZw" onkeyup="updateLive()">
+            <div class="group-title"><i class="fas fa-paint-brush"></i> STYLE</div>
             
             <div class="input-row" style="margin-top:10px;">
                 <div>
@@ -213,6 +211,8 @@
 
     <script>
         let currentAccent = "#00ff88";
+        // LOCKED BANNER IMAGE
+        const DEFAULT_BANNER = "https://media.discordapp.net/attachments/1423324034699104297/1454431005250158805/Eldoria.png?ex=69510fed&is=694fbe6d&hm=23450ed205132dfe7f935c5940db1759386a6a8e22e1301c73801405f68c0b6c&=&format=webp&quality=lossless&width=480&height=180";
 
         function updateColor(val) {
             currentAccent = val;
@@ -229,7 +229,6 @@
             updateLive();
         }
 
-        // --- NEW GALLERY LOGIC ---
         function getGalleryHTML(urls) {
             if (!urls || urls.length === 0) return "";
             return `
@@ -243,7 +242,6 @@
                     </div>
                 </div>
             </div>
-            
             <script>
                 window.galImages = ${JSON.stringify(urls)};
                 window.galIndex = 0;
@@ -263,7 +261,6 @@
                 content: document.getElementById('content').value || "<p>Loading...</p>",
                 author: document.getElementById('author').value,
                 date: document.getElementById('date').value,
-                image: document.getElementById('image').value,
                 overlay: document.getElementById('overlay').value,
                 badge: document.getElementById('badge').value,
                 galleryRaw: document.getElementById('gallery-urls').value
@@ -272,7 +269,6 @@
             const galleryUrls = d.galleryRaw.split('\n').map(u => u.trim()).filter(u => u.length > 0);
             const gallerySection = getGalleryHTML(galleryUrls);
 
-            // NOTE THE CSS CHANGES BELOW FOR MOBILE
             return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -285,15 +281,15 @@
         :root {
             --accent: ${currentAccent};
             --bg: #050505;
-            --glass: rgba(20, 20, 20, 0.95); /* Slightly darker for legibility */
+            --glass: rgba(20, 20, 20, 0.95);
             --border: rgba(255, 255, 255, 0.1);
         }
         body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         
-        /* Hero Section - FIXED MOBILE BUG HERE */
+        /* Hero Section */
         .hero {
             width: 100%; height: 50vh;
-            background: url('${d.image}') center/cover fixed;
+            background: url('${DEFAULT_BANNER}') center/cover fixed;
             display: flex; align-items: flex-end; justify-content: center; padding-bottom: 60px;
             position: relative;
         }
@@ -317,14 +313,14 @@
         .content h2 { color: white; font-family: 'Rajdhani'; margin-top: 40px; font-size: 2rem; border-left: 3px solid var(--accent); padding-left: 15px; }
         .box { background: rgba(0,0,0,0.3); border-left: 3px solid var(--accent); padding: 15px; margin: 20px 0; color: #fff; font-style: italic; }
 
-        /* GALLERY CSS */
+        /* Gallery CSS */
         .gallery-wrapper { margin: 40px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #000; }
         .gallery-frame { position: relative; width: 100%; height: 450px; }
         .gallery-frame img { width: 100%; height: 100%; object-fit: contain; background: #000; }
         .gallery-controls {
             position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.85);
             display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;
-            border-top: 1px solid var(--border); z-index: 50; /* Ensure clickable */
+            border-top: 1px solid var(--border); z-index: 50;
         }
         .gallery-controls button {
             background: var(--accent); border: none; padding: 8px 16px; cursor: pointer;
@@ -334,12 +330,9 @@
         .nav-bar { position: fixed; top: 0; width: 100%; padding: 20px 40px; z-index: 100; display: flex; justify-content: space-between; pointer-events: none; }
         .back-btn { pointer-events: auto; color: white; text-decoration: none; font-family: 'Rajdhani'; font-weight: 700; display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 50px; backdrop-filter: blur(5px); }
         
-        /* MOBILE FIXES */
+        /* Mobile Fixes */
         @media(max-width:768px) { 
-            .hero { 
-                background-attachment: scroll !important; /* DISABLES FIXED PARALLAX ON MOBILE */
-                height: 40vh;
-            }
+            .hero { background-attachment: scroll !important; height: 35vh; }
             h1 { font-size: 2.2rem; } 
             .card { padding: 25px; margin-top: -30px; } 
             .gallery-frame { height: 300px; } 
@@ -379,18 +372,19 @@
                 title: document.getElementById('title').value,
                 author: document.getElementById('author').value,
                 date: document.getElementById('date').value,
-                image: document.getElementById('image').value,
                 filename: document.getElementById('filename').value || "untitled.html",
                 section: document.getElementById('section').value
             };
             document.getElementById('outputFile').value = getPostHTML();
+            
+            // Using default banner in DB snippet too
             const dbSnippet = `
     {
         type: "${d.section}",
         title: "${d.title}",
         author: "${d.author}",
         date: "${d.date}",
-        image: "${d.image}",
+        image: "${DEFAULT_BANNER}",
         link: "DAILYBLOCKNEWS/${d.filename}"
     },`;
             document.getElementById('outputDB').value = dbSnippet;
