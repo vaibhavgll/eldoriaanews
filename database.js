@@ -7,7 +7,7 @@ const newsDatabase = [
         author: "VGAMER56588",
         date: "Dec 27, 2025",
         image: "https://placehold.co/600x300/111/00ff88?text=DRAGON",
-        link: "dailyblocknews/post1.html" // The file you saved
+        link: "dailyblocknews/post1/index.html" // The file you saved
     },
     // If you delete everything inside these brackets [], it will show "None"
 ];
