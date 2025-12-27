@@ -111,7 +111,7 @@
     <aside class="sidebar">
         <div class="header">
             <div class="logo">ELDORIA<span style="color:var(--primary)">.OP</span></div>
-            <div style="font-size:0.7rem; color:#555;">v4.0 Gallery</div>
+            <div style="font-size:0.7rem; color:#555;">v4.1 Fixed</div>
         </div>
 
         <div class="scroll-area">
@@ -153,9 +153,9 @@
             <label>Badge Text</label>
             <input type="text" id="badge" value="OFFICIAL" onkeyup="updateLive()">
 
-            <div class="group-title"><i class="fas fa-images"></i> EVIDENCE / GALLERY</div>
-            <label>Gallery URLs (One per line)</label>
-            <textarea id="gallery-urls" class="gallery-input" placeholder="https://image1.jpg&#10;https://image2.jpg&#10;https://image3.jpg" onkeyup="updateLive()"></textarea>
+            <div class="group-title"><i class="fas fa-images"></i> GALLERY</div>
+            <label>Image URLs (One per line)</label>
+            <textarea id="gallery-urls" class="gallery-input" placeholder="Paste URL 1&#10;Paste URL 2&#10;Paste URL 3" onkeyup="updateLive()"></textarea>
 
         </div>
 
@@ -198,12 +198,12 @@
             </div>
             <div class="modal-grid">
                 <div class="code-col">
-                    <label style="color:var(--primary)">1. FILE CODE (Paste in new .html)</label>
+                    <label style="color:var(--primary)">1. FILE CODE (New .html)</label>
                     <textarea id="outputFile" class="code-area"></textarea>
                     <button class="btn-copy" onclick="copyCode('outputFile')">COPY CODE</button>
                 </div>
                 <div class="code-col" style="background:#0e0e11;">
-                    <label style="color:#bd00ff">2. DB ENTRY (Paste in database.js)</label>
+                    <label style="color:#bd00ff">2. DB ENTRY (database.js)</label>
                     <textarea id="outputDB" class="code-area" style="color:#bd00ff"></textarea>
                     <button class="btn-copy" onclick="copyCode('outputDB')">COPY SNIPPET</button>
                 </div>
@@ -229,35 +229,39 @@
             updateLive();
         }
 
-        // --- GALLERY LOGIC GENERATOR ---
-        function getGalleryScript(urls) {
+        // --- NEW GALLERY LOGIC (FIXED) ---
+        function getGalleryHTML(urls) {
             if (!urls || urls.length === 0) return "";
             
-            // This JS will be embedded INSIDE the generated post
-            const urlArrayString = JSON.stringify(urls);
+            // This structure uses global window functions for absolute reliability
             return `
-            <div class="gallery-container" id="gallery-root">
-                <div class="gallery-view">
-                    <img id="gal-img" src="${urls[0]}" alt="Gallery Image">
-                    <div class="gal-nav">
-                        <button onclick="changeSlide(-1)"><i class="fas fa-chevron-left"></i></button>
+            <div class="gallery-wrapper">
+                <div class="gallery-frame">
+                    <img id="gal-img" src="${urls[0]}" alt="Gallery">
+                    <div class="gallery-controls">
+                        <button type="button" onclick="window.moveSlide(-1)"><i class="fas fa-chevron-left"></i></button>
                         <span id="gal-count">1 / ${urls.length}</span>
-                        <button onclick="changeSlide(1)"><i class="fas fa-chevron-right"></i></button>
+                        <button type="button" onclick="window.moveSlide(1)"><i class="fas fa-chevron-right"></i></button>
                     </div>
                 </div>
             </div>
             
             <script>
-                const galleryImages = ${urlArrayString};
-                let currentIndex = 0;
-                
-                function changeSlide(direction) {
-                    currentIndex += direction;
-                    if (currentIndex >= galleryImages.length) currentIndex = 0;
-                    if (currentIndex < 0) currentIndex = galleryImages.length - 1;
+                // Gallery Data
+                window.galImages = ${JSON.stringify(urls)};
+                window.galIndex = 0;
+
+                // Global function for buttons
+                window.moveSlide = function(step) {
+                    window.galIndex += step;
                     
-                    document.getElementById('gal-img').src = galleryImages[currentIndex];
-                    document.getElementById('gal-count').innerText = (currentIndex + 1) + " / " + galleryImages.length;
+                    // Loop logic
+                    if(window.galIndex >= window.galImages.length) window.galIndex = 0;
+                    if(window.galIndex < 0) window.galIndex = window.galImages.length - 1;
+
+                    // Update DOM
+                    document.getElementById('gal-img').src = window.galImages[window.galIndex];
+                    document.getElementById('gal-count').innerText = (window.galIndex + 1) + " / " + window.galImages.length;
                 }
             <\/script>`;
         }
@@ -274,9 +278,8 @@
                 galleryRaw: document.getElementById('gallery-urls').value
             };
 
-            // Process Gallery URLs
             const galleryUrls = d.galleryRaw.split('\n').map(u => u.trim()).filter(u => u.length > 0);
-            const galleryHTML = galleryUrls.length > 0 ? getGalleryScript(galleryUrls) : "";
+            const gallerySection = getGalleryHTML(galleryUrls);
 
             return `<!DOCTYPE html>
 <html lang="en">
@@ -319,22 +322,27 @@
         .content h2 { color: white; font-family: 'Rajdhani'; margin-top: 40px; font-size: 2rem; border-left: 3px solid var(--accent); padding-left: 15px; }
         .box { background: rgba(0,0,0,0.3); border-left: 3px solid var(--accent); padding: 15px; margin: 20px 0; color: #fff; font-style: italic; }
 
-        /* GALLERY STYLES */
-        .gallery-container { margin: 40px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #000; }
-        .gallery-view { position: relative; width: 100%; height: 400px; }
-        .gallery-view img { width: 100%; height: 100%; object-fit: contain; }
-        .gal-nav {
-            position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.8);
+        /* GALLERY CSS */
+        .gallery-wrapper { margin: 40px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #000; }
+        .gallery-frame { position: relative; width: 100%; height: 450px; }
+        .gallery-frame img { width: 100%; height: 100%; object-fit: contain; background: #000; }
+        .gallery-controls {
+            position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.85);
             display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;
+            border-top: 1px solid var(--border);
         }
-        .gal-nav button { background: var(--accent); border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-weight: bold; }
-        .gal-nav span { font-family: 'Rajdhani'; font-weight: bold; color: white; }
+        .gallery-controls button {
+            background: var(--accent); border: none; padding: 8px 16px; cursor: pointer;
+            border-radius: 4px; font-weight: bold; font-family: 'Rajdhani'; text-transform: uppercase;
+        }
+        .gallery-controls button:hover { filter: brightness(1.2); }
+        .gallery-controls span { font-family: 'Rajdhani'; color: white; font-weight: 700; }
 
         .nav-bar { position: fixed; top: 0; width: 100%; padding: 20px 40px; z-index: 100; display: flex; justify-content: space-between; }
         .back-btn { color: white; text-decoration: none; font-family: 'Rajdhani'; font-weight: 700; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
         .back-btn:hover { color: var(--accent); }
         
-        @media(max-width:768px) { h1 { font-size: 2.5rem; } .card { padding: 25px; } .gallery-view { height: 250px; } }
+        @media(max-width:768px) { h1 { font-size: 2.5rem; } .card { padding: 25px; } .gallery-frame { height: 300px; } }
     </style>
 </head>
 <body>
@@ -349,7 +357,8 @@
         </div>
         <div class="content">
             ${d.content}
-            ${galleryHTML} </div>
+            ${gallerySection}
+        </div>
         <div style="margin-top: 50px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; color: #555; font-size: 0.8rem; font-family: 'Rajdhani';">OFFICIAL TRANSMISSION</div>
     </main>
 </body>
